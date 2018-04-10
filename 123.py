@@ -13,11 +13,11 @@ try:
 except TimeoutException:
     print("Timed out waiting for page to load")
     browser.quit()
-titles_element = browser.find_element_by_xpath("//a[@class='text-bold']")
+titles_element = browser.find_elements_by_xpath("//a[@class='text-bold']")
 titles = [x.text for x in titles_element]
 print('titles: ')
 print(titles, '\n')
-language_element = browser.find_element_by_xpath("//p[@class='mb-0 f6 text-gray']")
+language_element = browser.find_elements_by_xpath("//p[@class='mb-0 f6 text-gray']")
 languages = [x.text for x in language_element]
 print("languages:")
 print(languages, '\n')
