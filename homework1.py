@@ -49,7 +49,7 @@ listDir("c:/owen1992")
 #define readExcel function to read and print content of excel,  readExcel("c:/myexcel.xls", 0) will read sheet 0 content, using xlrd library
 def readExcel(excelpath, sheetIndex, c):
     xl_workbook = xlrd.open_workbook(excelpath)
-    sheet_names = xl_workbook.sheet_names()
+    sheet_names = xl_workbook.sheet_names()gi
     print('Sheet Names', sheet_names)
     xl_sheet = xl_workbook.sheet_by_name(sheet_names[sheetIndex])
     print(xl_sheet.col(c))
