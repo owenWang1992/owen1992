@@ -4,7 +4,7 @@
 # variables, collection (array, set , dictionary), looping, if-else-else-if, function, object
 #
 
-import os,xlrd
+import os,xlrd,time
 
 def sum(inp):
     x = 0
@@ -58,3 +58,9 @@ readExcel("letsTest.xlsx", 0, 1)
 
 x= "blue,red,green"
 print(x.split(","))
+
+print("OK ", end=" ")
+time.sleep(0.5)
+print(". ", end=" ")
+time.sleep(0.5)
+print(".",end=" ")

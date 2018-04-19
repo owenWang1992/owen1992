@@ -33,25 +33,25 @@ class LandingPageTest(unittest.TestCase):
 
     def testUrl(self):
         urlTable_A = [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-XXXXXXX-XX-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
         ]
 
         urlTable_B = [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
         ]
         is_Test_B = "-B0-" in self.placements[0]["url"]
         urlTable = urlTable_A
@@ -63,9 +63,9 @@ class LandingPageTest(unittest.TestCase):
         for idx, placement in enumerate(self.placements):
             self.assertEqual(placement["url"], urlTable[idx])
             
-    def tearDown(self):
-        self.driver.close()
-        self.driver.quit()
+    #def tearDown(self):
+        #self.driver.close()
+        #self.driver.quit()
 
 
 
