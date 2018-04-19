@@ -22,15 +22,14 @@ class LandingPageTest(unittest.TestCase):
         self.links = [link for link in tlinks if link.is_displayed()]
         self.urls = [x.get_attribute("href") for x in self.links]
         self.htmls = [x.get_attribute("innerText") for x in self.links]
-       
-
-#parsed = urlparse.urlparse(url)
-#print urlparse.parse_qs(parsed.query)['def']
-        print("\n".join(self.htmls))
+        self.placements = []
         for url in self.urls:
             a = url.split('?')
-            parameters = a[1].split('&')
-            print(parameters)
+            placement = dict(parse.parse_qsl(a[1]))
+            placement["url"] = url
+            self.placements.append(placement)
+        
+        print(self.parameters)
         # print(self.urls, sep = "\n")
 
     def testUrl(self):
