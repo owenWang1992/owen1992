@@ -28,14 +28,41 @@ class LandingPageTest(unittest.TestCase):
             placement = dict(parse.parse_qsl(a[1]))
             placement["url"] = url
             self.placements.append(placement)
-        
-        print(self.parameters)
-        # print(self.urls, sep = "\n")
+        for placement in self.placements:
+            print(placement["url"])
 
     def testUrl(self):
-        self.assertEqual(self.htmls[0], "Get your free report")
-        # self.assertEqual(self.urls[0], )
+        urlTable_A = [
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-XXXXXXX-XX-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+        ]
 
+        urlTable_B = [
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+        ]
+        is_Test_B = "-B0-" in self.placements[0]["url"]
+        urlTable = urlTable_A
+        if(is_Test_B):
+            urlTable = urlTable_B
+            print("B Test")
+        else:
+            print("A Test")
+        for idx, placement in enumerate(self.placements):
+            self.assertEqual(placement["url"], urlTable[idx])
+            
     def tearDown(self):
         self.driver.close()
         self.driver.quit()
