@@ -32,10 +32,10 @@ class LandingPageTest(unittest.TestCase):
 
     def testA(self):
         urlTable = [
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-A0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-A0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-A0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-A0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
         ]
 
         testUrl_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
@@ -48,14 +48,14 @@ class LandingPageTest(unittest.TestCase):
 
     def testB(self):
         urlTable = [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VMAC-DIR-XXXXXX-XXXXXX-XXXXX"
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
         ]
         testUrl_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         placements = self.getPlacementsFromPage(testUrl_B)
