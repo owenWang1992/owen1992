@@ -1,0 +1,642 @@
+<html>
+
+<head>
+    <title>DCM AD Validation</title>
+    <script src="https://image.experiandirect.com/experian-site/global-files/js/jquery.min.js"></script>
+    <script>
+        const PAGE_SIZE = 20;
+
+        //setting for DEBUG
+        const DEBUG = 0; //change to 1 for debug
+        var maxLength = 100; //set small value for test purpose 
+
+        var placements = [];
+        var errorList = [];
+        var pageIndex = 0;
+
+        function Placement(name, id, preview, adLink, adUrl, query, errors) {
+            this.name = name;
+            this.id = id;
+            this.preview = preview;
+            this.adLink = adLink;
+            this.adUrl = adUrl;
+            this.query = query;
+            this.errors = errors;
+        }
+
+        var summary = {
+            reset: function () {
+                $("#summary-msg").empty();
+                $("#summary-progress").empty();
+            },
+            log: function (message) {
+                $("#summary-msg").append("<p>" + message + "</p>");
+            },
+            logError: function (message) {
+                $("#summary-msg").append("<p class='error'>" + "***Error: " + message + "</p>");
+            },
+            logProgress: function (message) {
+                $("#summary-progress").html("<p class='progress'>" + message + "</p>");
+            },
+            print: function () {
+                var dl = $("<dl>");
+                dl.append("<dt>Total: </dt><dd>" + placements.length + "</dd></dt>");
+                dl.append("<dt>Pass: </dt><dd>" + (placements.length - errorList.length) + "</dd></dt>");
+                dl.append("<dt>Failed: </dt><dd>" + errorList.length + "</dd></dt>");
+                $(".summary-header").empty().append(dl);
+            },
+
+            updateProgress: function (value) {
+                var message = "Processing " + value + " of " + placements.length;
+                this.logProgress(message);
+            }
+        }
+
+        function extractData(htmlText) {
+            var nameRegex = /<td class="placement">([\s\S]+?)<\/td>/gi;
+            var previewRegex = /<ins class='dcmads'[\s\S]+?<\/ins>/gi;
+            var placementIdRegex = /<span[^>]*>([^<]+)<\/span>/i
+            var previewNumPerPlacement = 1
+            if (!nameRegex.test(htmlText) || !previewRegex.test(htmlText)) {
+                summary.logError("Fatal error: invalid data format!");
+            }
+            else {
+                var nameFields = htmlText.match(nameRegex).map(function (item) { return item.replace(nameRegex, '$1').trim(); });
+                var previewFields = htmlText.match(previewRegex);
+                if (nameFields && previewFields && (previewFields.length % nameFields.length) === 0) {
+                    previewNumPerPlacement = previewFields.length / nameFields.length
+                    var totalLength = DEBUG ? Math.min(maxLength, nameFields.length) : nameFields.length;
+                    for (let i = 0; i < totalLength; i++) {
+                        var placementId = placementIdRegex.test(nameFields[i]) ? nameFields[i].match(placementIdRegex)[1] : "";
+                        var name = nameFields[i].replace(/<span[^>]*>[^>]+>/i, "").trim();
+                        for (let j = 0; j < previewNumPerPlacement; j++) {
+                            placements.push(new Placement(name, placementId, previewFields[i * previewNumPerPlacement + j]));
+                        }
+
+                    }
+                }
+                else {
+                    summary.logError("Fatal error: invalid data format!");
+                }
+            }
+        }
+
+        function newRow(index) {
+            var row = $('<tr></tr>').addClass('data');
+            row.append($('<td></td').addClass('ad-index').append(index + 1));
+            row.append($('<td></td').addClass('ad-name').append(placements[index].name));
+            row.append($('<td></td').addClass('ad-placementId').append(placements[index].id));
+            row.append($('<td></td').addClass('ad-img').append(placements[index].adLink));
+            row.append($('<td></td').addClass('ad-url').append(placements[index].adUrl));
+            row.append($('<td></td').addClass('ad-pc').append(placements[index].query.pc));
+            row.append($('<td></td').addClass('ad-cc').append(placements[index].query.cc));
+            row.append($('<td></td').addClass('ad-ref').append(placements[index].query.ref));
+            var status = placements[index].errors.length === 0 ? "OK!!!" : placements[index].errors.join(" ");
+            row.append($('<td></td').addClass('ad-ok').append(status));
+            return row;
+        }
+
+
+        function tableHeader() {
+            var thead = $('<thead>')
+            var row = $('<tr></tr>').addClass('theader');
+            row.append($('<th></th>').append('No.'));
+            row.append($('<th></th>').append('Ad Name'));
+            row.append($('<th></th>').append('AD PlacementID'));
+            row.append($('<th></th>').append('Ad Image'));
+            row.append($('<th></th>').append('Ad Url'));
+            row.append($('<th></th>').append('PC Value'));
+            row.append($('<th></th>').append('CC Value'));
+            row.append($('<th></th>').append('Ref Value'));
+            row.append($('<th></th>').append('OK?'));
+            thead.append(row);
+            return thead;
+        }
+
+        function newPreviewRow(index) {
+            var row = $('<tr></tr>').addClass('data');
+            row.append($('<td></td').addClass('ad-index').append(index + 1));
+            row.append($('<td></td').addClass('ad-img').append(placements[index].preview));
+            return row;
+        }
+
+        function validate() {
+            var inputHtml = $("#htmlContent").val();
+            validateHtml(inputHtml);
+        }
+
+        function validateHtml(inputHtml) {
+            summary.reset();
+            pageIndex = 0;
+            extractData(inputHtml);
+            $("div#main").remove();
+            $(".summary").show();
+            // $("div.tab").css('display', 'inline-block');
+            // selectTab("all");
+            summary.log("Start prcessing...");
+            summary.updateProgress(0, placements.length);
+            if (placements.length > 0) {
+                loadPage();
+            }
+        }
+
+        function saveText(filename, text) {
+            var tempElem = document.createElement('a');
+            tempElem.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            tempElem.setAttribute('download', filename);
+            tempElem.click();
+        }
+
+        function readHtmlFile(input) {
+            var reader = new FileReader();
+            document.getElementById("htmlContent").value = "Loading data ....";
+            reader.onload = function () {
+                var htmlContent = reader.result;
+                validateHtml(htmlContent);
+            };
+            reader.readAsText(input.files[0]);
+
+
+        }
+
+        function createDataTable(fromIndex, size) {
+            var table = $("<table>");
+            var tbody = $('<tbody>');
+            table.append(tableHeader());
+            for (var i = fromIndex; i < Math.min(fromIndex + size, placements.length); i++) {
+                var row = newRow(i);
+                if (placements[i].errors.length) {
+                    row.addClass("error")
+                }
+                tbody.append(row);
+            }
+            table.append(tbody);
+            return table;
+        }
+
+        function createErrorListTable(fromIndex, size) {
+            var table = $("<table>");
+            table.append(tableHeader());
+            var tbody = $("<tbody>");
+            for (var i = fromIndex; i < Math.min(fromIndex + size, errorList.length); i++) {
+                tbody.append(newRow(errorList[i]).addClass("error"));
+            }
+            table.append(tbody);
+            return table;
+        }
+
+        function dataProcessCompleted() {
+            //saveText("Results.html", document.documentElement.outerHTML);
+            summary.reset();
+            checkData();
+            var table = createDataTable(0, placements.length);
+            var errorTable = createErrorListTable(0, errorList.length);
+            $("div#all").empty().append(table);
+            $("div#errors").empty();
+            if (errorList.length) {
+                $("div#errors").append(errorTable);
+            }
+            summary.updateProgress(placements.length);
+            summary.print();
+            summary.log("Process completed!");
+            summary.logProgress("");
+            $("#all_b").text("All (" + placements.length + ")")
+            $("#errors_b").text("Errors (" + errorList.length + ")")
+            selectTab("all");
+            $("#tab").css('display', 'inline-block');
+        }
+
+        function pageLoaded() {
+            $('iframe').contents().find('tr.data').each(parsePlacementData);
+            if (pageIndex < placements.length) {
+                loadPage();
+            }
+            else {
+                dataProcessCompleted();
+            }
+        }
+
+        function loadPage() {
+            //load a page into a iframe, so we could check pc/cc page by page rather than load all contents.
+            $("#preview").empty();
+            var table = $("<table></table>");
+            for (var i = pageIndex; i < Math.min(pageIndex + PAGE_SIZE, placements.length); i++) {
+                table.append(newPreviewRow(i));
+            }
+            pageIndex += PAGE_SIZE;
+            var iframe = document.createElement('iframe');
+            iframe.style.width = "100%";
+            var html = '<html><body onload="parent.pageLoaded()">' + table.prop('outerHTML') + '</body></html>';
+            document.getElementById("preview").appendChild(iframe);
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(html);
+            iframe.contentWindow.document.close();
+        }
+
+        function parseQueryString(url) {
+            var queryReg = /\?(.+)/i
+            var querys = {};
+            var queryString = queryReg.test(url) ? url.match(queryReg)[1] : "";
+            queryString.split('&').forEach(function (item) {
+                queryTerm = item.split('=');
+                querys[queryTerm[0]] = queryTerm[1];
+            })
+            return querys;
+        }
+
+        function parsePlacementData() {
+            $(this).find('iframe').contents().find('iframe').contents().click()
+            var index = parseInt($(this).children("td.ad-index").text()) - 1;
+            var adLink = $(this).find('iframe').contents().find('a');
+            var adUrl = adLink.attr('href');
+            var adUrlRegex = /adurl=(http.+)/i;
+            var placementId = placements[index].id;
+            if (adLink[0]) {
+                placements[index].adUrl = adUrlRegex.test(adUrl) ? unescape(adUrl.match(adUrlRegex)[1]) : "";
+                placements[index].adLink = adLink[0].outerHTML;
+            }
+            summary.updateProgress(index);
+        }
+
+        function injectErrorData() {
+            const ERROR_URLS = [];
+            var usedIndex = [];
+            ERROR_URLS.push(""); //url doesn't exist
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.html?pc=dsp_exp_gdn&cc=dsp_exp_12_3135822_222222999_98439372&ref=dsp_dws"); //correct url but unmatch placement id
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.html?cc=dsp_exp_12_3135822_215538690_98439372&ref=dsp_dws"); //pc not exist
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.html?pc=dsp_exp_gdn&ref=dsp_dws"); //cc not exist
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.html?pc=111gdn&cc=dsp_exp_12_3135822_215538690_98439372&ref=dsp_dws"); //invalid pc
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.html?pc=dsp_exp_gdn&cc=3135822_215538690_98439372&ref=dsp_dws"); //invalid cc
+            ERROR_URLS.push("https://www.experian.com/consumer-products/free-dark-web-email-scan.htmlpc=dsp_exp_gdn&cc=dsp_exp_12_3135822_215538690_98439372&ref=dsp_dws"); //invalid url
+            ERROR_URLS.forEach(function (item) {
+                do {
+                    var index = Math.floor(Math.random() * placements.length)
+                } while (usedIndex.indexOf(index) !== -1);
+                usedIndex.push(index);
+                placements[index].adUrl = item; //only change adurl not adlink just for test
+            });
+        }
+
+        function checkData() {
+            errorList = [];
+            if (DEBUG) {
+                injectErrorData()
+            }
+            placements.forEach(function (placement, index) {
+                var result = checkAdUrl(placement.adUrl, placement.id);
+                placement.query = result.query;
+                placement.errors = result.errors;
+                if (result.errors.length) {
+                    errorList.push(index);
+                    summary.logError("row: " + (index + 1) + " placementId: " + placement.id + " error: " + result.errors.join(", "));
+                }
+            });
+        }
+
+        function checkAdUrl(adUrl, placementId) {
+            var errors = [];
+            var query = {};
+            if (!adUrl) {
+                errors.push("url doesn't exist.")
+            }
+            else {
+                query = parseQueryString(adUrl);
+                if (!query.ref) {
+                    errors.push("invalid url.")
+                }
+                else {
+                    var queryErrors = checkQuery(query, placementId);
+                    errors = errors.concat(queryErrors);
+                }
+            }
+            return { query: query, errors: errors };
+        }
+
+        function checkQuery(query, placementId) {
+            var pcRegex = /^[a-zA-Z]+_[a-zA-Z]+_[a-zA-Z0-9]+$/i;
+            var ccRegex = /^[a-zA-Z]+_[a-zA-Z]+_12_[0-9]+_([0-9]+)_[0-9]+$/i;
+            var errors = [];
+            if (!query.pc) {
+                errors.push("pc doesn't exist.");
+            } else if (!pcRegex.test(query.pc)) {
+                errors.push("invalid pc.");
+            }
+
+            if (!query.cc) {
+                errors.push("cc doesn't exist.");
+            } else if (!ccRegex.test(query.cc)) {
+                errors.push("invalid cc.");
+            } else if (placementId && query.cc.match(ccRegex)[1] !== placementId) {
+                errors.push("placement id doesn't match.");
+            }
+            else if (!placementId) {
+                errors.push("placement id doesn't exist.");
+            }
+
+            return errors;
+        }
+
+        function selectTab(tabId) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabId).style.display = "block";
+            document.getElementById(tabId + "_b").className += " active";
+        }
+
+
+        function simulate(element, eventName) {
+            var eventMatchers = {
+                'HTMLEvents': /^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,
+                'MouseEvents': /^(?:click|dblclick|mouse(?:down|up|over|move|out))$/
+            }
+            var defaultOptions = {
+                pointerX: 0,
+                pointerY: 0,
+                button: 0,
+                ctrlKey: false,
+                altKey: false,
+                shiftKey: false,
+                metaKey: false,
+                bubbles: true,
+                cancelable: true
+            }
+            var options = extend(defaultOptions, arguments[2] || {});
+            var oEvent, eventType = null;
+
+            for (var name in eventMatchers) {
+                if (eventMatchers[name].test(eventName)) { eventType = name; break; }
+            }
+
+            if (!eventType)
+                throw new SyntaxError('Only HTMLEvents and MouseEvents interfaces are supported');
+
+            if (document.createEvent) {
+                oEvent = document.createEvent(eventType);
+                if (eventType == 'HTMLEvents') {
+                    oEvent.initEvent(eventName, options.bubbles, options.cancelable);
+                }
+                else {
+                    oEvent.initMouseEvent(eventName, options.bubbles, options.cancelable, document.defaultView,
+                        options.button, options.pointerX, options.pointerY, options.pointerX, options.pointerY,
+                        options.ctrlKey, options.altKey, options.shiftKey, options.metaKey, options.button, element);
+                }
+                element.dispatchEvent(oEvent);
+            }
+            else {
+                options.clientX = options.pointerX;
+                options.clientY = options.pointerY;
+                var evt = document.createEventObject();
+                oEvent = extend(evt, options);
+                element.fireEvent('on' + eventName, oEvent);
+            }
+            return element;
+        }
+
+        function extend(destination, source) {
+            for (var property in source)
+                destination[property] = source[property];
+            return destination;
+        }
+
+
+    </script>
+
+    <style>
+        body {
+            font-family: Roboto, Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #575756;
+            margin: 0;
+            float: left;
+            min-width: 100%;
+            -moz-osx-font-smoothing: grayscale
+        }
+
+        .error {
+            color: #c00
+        }
+
+        .header {
+            padding: 0 10px;
+            background-color: #f5f5f5;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15)
+        }
+
+        .summary-header {
+            font-size: 11px;
+            margin: 10px 20px;
+        }
+
+        .summary-header dt {
+            color: #555;
+            display: inline;
+        }
+
+        .summary-header dd {
+            color: #222;
+            display: inline;
+            font-weight: bold;
+            margin: 0 15px 0 0;
+        }
+
+        .summary {
+            color: #222;
+            font-size: 11px;
+            line-height: 15px;
+            margin: 10px 20px;
+            display: none;
+        }
+
+        .summary p {
+            margin: 2px 0;
+            white-space: pre;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0 0 0;
+            white-space: nowrap;
+            width: 100%;
+        }
+
+        tr {
+            border: solid #d0d0d0;
+            border-width: 1px 0;
+        }
+
+        tr:hover {
+            background: #ffffc9;
+        }
+
+        thead {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            font-size: 11px;
+            height: 30px;
+            text-align: left;
+        }
+
+        th {
+            padding: 7px 10px;
+        }
+
+        th:first-child span {
+            margin-left: 10px;
+        }
+
+        td {
+            padding: 10px;
+            vertical-align: top;
+            font-size: 12px;
+            border: solid #d0d0d0;
+            border-width: 0 1px 0 0;
+        }
+
+        .ad-index {
+            min-width: 30px;
+        }
+
+        .ad-name {
+            min-width: 200px;
+            max-width: 400px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .ad-ok {
+            color: #2FBA78;
+        }
+
+        .ad-img {
+            overflow: auto;
+            max-width: 350px;
+        }
+
+        .ad-url {
+            max-width: 280px;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        tr.error td {
+            background: #ee3;
+        }
+
+        tr.error td.ad-ok {
+            color: #c00;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit
+        }
+
+        button {
+            background-color: #26478D;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            color: white;
+            padding: 4px 10px;
+            text-align: center;
+            display: inline-block;
+            font-size: 14px;
+            margin: 0;
+            height: 2.14em;
+            min-width: 100px;
+            border-radius: 3.01px;
+        }
+
+        button:hover {
+            background-color: #ddd;
+            border-color: #192f5d;
+            color: #26478D;
+        }
+
+        h1 {
+            font-size: 24px;
+            color: #26478d
+        }
+
+        .tab {
+            display: none;
+        }
+
+        .tab button {
+            border: 1px solid #26478d;
+            float: left;
+            outline: none;
+            cursor: pointer;
+            padding: 0px 36px;
+            transition: 0.3s;
+            background-color: transparent;
+            color: #26478d;
+        }
+
+        .tab button:hover {
+            background-color: #ddd;
+            border-color: #192f5d;
+        }
+
+        .tab button.active {
+            color: #fff;
+            background-color: #26478d;
+        }
+
+        .tabcontent {
+            display: none;
+            height: 100%;
+        }
+
+        #main {
+            padding: 20px;
+        }
+    </style>
+
+
+</head>
+
+<body style="background-color:white; margin:0 auto">
+    <div class="header">
+        <h1>DCM AD Validation</h1>
+        <div class="tab" id="tab">
+            <button id="all_b" class="tablinks active" onclick="selectTab('all')">All</button>
+            <button id="errors_b" class="tablinks" onclick="selectTab('errors')">Errors</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="summary-header">
+        </div>
+        <div class="summary">
+            <div id="summary-msg"></div>
+            <div id="summary-progress"></div>
+        </div>
+        <div id="all" class="tabcontent"></div>
+        <div id="errors" class="tabcontent"></div>
+        <div id="main">
+            <textarea id="htmlContent" rows="30 " style="width:100%; " placeholder="Please sumbit your html file: " required></textarea>
+            <div align="right" style="margin: 8px">
+                <button type="button" onclick="validate(); "> Go </button>
+                <button type="file" onclick="document.getElementById('input-file').click();">Choose file</button>
+                <input type="file" id="input-file" style="display: none" onchange="readHtmlFile(this);">
+            </div>
+        </div>
+    </div>
+    <div id="preview" style="display:none;"></div>
+</body>
+
+</html>
