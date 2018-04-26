@@ -20,7 +20,16 @@ class LandingPageTest(unittest.TestCase):
         self.driver = webdriver.Chrome(options=options)
         self.driver.implicitly_wait(10)
         self.mobile = False
-
+        self.opTable = {
+            'at_fcras100': 'FRCR-PRD-PCO-100', 
+            'at_eiwpd102': 'W3DC-PRD-PCO-102', 
+            'at_eiwa104': 'WPAC-PRD-PCO-104', 
+            'at_eiwb105': 'WPMC-PRD-PCO-105', 
+            'at_eiwpa106': 'W3AC-PRD-PCO-106', 
+            'at_1b1s109': '1B1S-PRD-PCO-109', 
+            'at_3b3s110': '3B3S-PRD-PCO-110'
+            }
+        
     def getPlacementsFromPage(self):
         time.sleep(5)
         links = self.driver.find_elements(By.CSS_SELECTOR, "#main a.btn")
@@ -32,137 +41,63 @@ class LandingPageTest(unittest.TestCase):
             placement["url"] = url
             placement["title"] = link.get_attribute("innerText")
             placement["hidden"] = False if link.is_displayed() else True
+            if placement["op"]:
+                opComponents = placement["op"].split("-")
+                placement["op_offer"] = "-".join(opComponents[0:4])
+                placement["op_postion"] = "-".join(opComponents[4:5])
+                placement["op_campaing"] = "-".join(opComponents[5:6])
+                placement["op_AB"] = "-".join(opComponents[6:7])
+                placement["op_source"] = "-".join(opComponents[7:8])
+                placement["op_platform"] = "-".join(opComponents[8:9])      
             placements.append(placement)
         return placements
 
-    def check(self, placements, version):
-        url_table = self.mapping_table(version)
-        if self.mobile:
-            url_table = [x.replace("VWIN", "TWIN") for x in url_table]
-        
-        for idx, placement in enumerate(placements):
-            self.assertEqual(placement["url"], url_table[idx])
 
-    def mapping_table(self, version):
-        urlTable ={"A" : [
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-A0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ], "B" : [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ], "B_Annual" : [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-MQE-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-TBL-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ]}
+    def checkNewOffer(self, placements):
+        newOffer = {}
+        for placement in placements:
+            if placement["offer"] not in self.opTable:
+                newOffer[placement["offer"]] = placement["op_offer"]
+        if newOffer:
+            print("***find new offers, please add them to opTable in the code.")
+            print(newOffer)
 
-        urlTable_mobile ={"A" : [
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ], "B" : [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ], "B_Annual" : [
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
-            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
-        ]}
-
-        return urlTable_mobile[version] if self.mobile else urlTable[version]
-
-    def checkAB(self):
-        print(self.driver.current_url)
+    def checkPage(self):
         placements = self.getPlacementsFromPage()
         for placement in placements:
-            print(placement["title"], placement["url"])
+            print("{:20s} {} {}".format(placement["title"], placement["url"], "\tH" if placement["hidden"] else ""))
         print("")
-        if "-B0-" in placements[0]["url"]:
-            self.check(placements, "B")
-        else:
-            self.check(placements, "A")
+        self.checkNewOffer(placements)  
+        for placement in placements:
+            self.assertEqual(self.opTable[placement["offer"]], placement["op_offer"])
+            self.assertNotEqual(placement["op_campaing"], "XXXX")        
 
+    
+    def doTest(self):        
+        startUrl = "https://www.experian.com"
+        testUrl_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
+        testUrl_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
+        testUrl = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        #self.driver.get(startUrl)
+        self.driver.get(testUrl)
+        print(self.driver.current_url)
+        self.checkPage()
         planButtons = self.driver.find_elements(
             By.CSS_SELECTOR, "span.plan-btn")
         if planButtons:
             planButtons[1].click()
             time.sleep(3)
-            placements = self.getPlacementsFromPage()
-            self.check(placements, "B_Annual")
+            self.checkPage()
 
-    def testDesktopA(self):        
-        startUrl = "https://www.experian.com"
-        testUrl_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
-        testUrl_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        #self.driver.get(startUrl)
-        self.driver.get(testUrl_A)
-        print(self.driver.current_url)
-        placements = self.getPlacementsFromPage()
-        for placement in placements:
-            print(placement["title"], placement["url"])
-        print("")
-        
-        '''
-        reportScoreElement = self.driver.find_element(By.CSS_SELECTOR,"ul.left-main-nav.main-nav.flex-nav > li:nth-child(1) > a")
-        hover = ActionChains(self.driver).move_to_element(reportScoreElement)
-        hover.perform()
-        compareAllProductsElement = self.driver.find_element(By.CSS_SELECTOR, ".dropdown-shadow > li:nth-child(6) > a")
-        compareAllProductsElement.click()
-        
-        self.mobile = False
-        self.checkAB()
-        '''
+    def testDesktop(self):
+        print("\nTest Desktop")
+        self.doTest()
+      
     def testMobile(self):
+        print("\nTest Mobile")
         self.driver.set_window_size(375, 812)
-        startUrl = "https://www.experian.com"
-        testUrl_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
-        testUrl_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        #self.driver.get(startUrl)
-        self.driver.get(testUrl_A)
-        print(self.driver.current_url)
-        placements = self.getPlacementsFromPage()
-        for placement in placements:
-            print(placement["title"], placement["url"])
-        print("")
-        
-        '''
-        barElement =self.driver.find_element(By.CSS_SELECTOR,".nav-toggle")
-        barElement.click()
-        reportScoreElement = self.driver.find_element(By.CSS_SELECTOR,"ul.left-main-nav.main-nav.flex-nav > li:nth-child(1) > span")
-        reportScoreElement.click()
-        compareAllProductsElement = self.driver.find_element(By.CSS_SELECTOR, "ul.left-main-nav.main-nav.flex-nav > li:nth-child(1) > ul > div > li:nth-child(6) > a")
-        self.driver.get(compareAllProductsElement.get_attribute("href"))
-        #compareAllProductsElement.click()
-        
-        self.mobile = True
-        self.checkAB()
-        '''
-
+        self.doTest()
+    
     def tearDown(self):
         self.driver.close()
         self.driver.quit()
