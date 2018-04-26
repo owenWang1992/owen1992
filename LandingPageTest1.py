@@ -8,11 +8,11 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 '''
-Grab all op links and print out.
-
+Navigation to target page
+Grab all op links in page and print out.
 Assert offer and op match each other based on a opTable dictionary.
-Assert no unrecognized offer and op pair
-Assert Campain field is not "XXXX"
+Assert no unrecognized offer and op pairs
+Assert Campaign field is not "XXXX"
 Test passed if all assert pass, otherwise failed.
 
 if new offer and op pairs are found, print out so that they can be copied and added to opTable
@@ -55,7 +55,7 @@ class LandingPageTest(unittest.TestCase):
                 opComponents = placement["op"].split("-")
                 placement["op_offer"] = "-".join(opComponents[0:4])
                 placement["op_postion"] = "-".join(opComponents[4:5])
-                placement["op_campaing"] = "-".join(opComponents[5:6])
+                placement["op_campaign"] = "-".join(opComponents[5:6])
                 placement["op_AB"] = "-".join(opComponents[6:7])
                 placement["op_source"] = "-".join(opComponents[7:8])
                 placement["op_platform"] = "-".join(opComponents[8:9])      
@@ -80,7 +80,7 @@ class LandingPageTest(unittest.TestCase):
         self.checkNewOffer(placements)  
         for placement in placements:
             self.assertEqual(self.opTable[placement["offer"]], placement["op_offer"])
-            self.assertNotEqual(placement["op_campaing"], "XXXX")        
+            self.assertNotEqual(placement["op_campaign"], "XXXX")        
 
     
     def doTest(self):        
