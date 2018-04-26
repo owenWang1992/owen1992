@@ -25,13 +25,13 @@ class LandingPageTest(unittest.TestCase):
         time.sleep(5)
         tlinks = self.driver.find_elements(By.CSS_SELECTOR, "#main a.btn")
         links = [link for link in tlinks if link.is_displayed()]
-        urls = [x.get_attribute("href") for x in links]
-        # htmls = [x.get_attribute("innerText") for x in links]
         placements = []
-        for url in urls:
+        for link in links:
+            url = link.get_attribute("href")
             a = url.split('?')
             placement = dict(parse.parse_qsl(a[1]))
             placement["url"] = url
+            placement["title"] = link.get_attribute("innerText")
             placements.append(placement)
         return placements
 
@@ -69,12 +69,37 @@ class LandingPageTest(unittest.TestCase):
             "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-VWIN-DIR-XXXXXX-XXXXXX-XXXXX"
         ]}
 
-        return urlTable[version]
+        urlTable_mobile ={"A" : [
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-A0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
+        ], "B" : [
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwb105&br=exp&op=WPMC-PRD-PCO-105-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpd102&br=exp&op=W3DC-PRD-PCO-102-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
+        ], "B_Annual" : [
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-MQE-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwa104&br=exp&op=WPAC-PRD-PCO-104-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_eiwpa106&br=exp&op=W3AC-PRD-PCO-106-TBL-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_1b1s109&br=exp&op=1B1S-PRD-PCO-109-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX",
+            "https://usa.experian.com/#/registration?offer=at_3b3s110&br=exp&op=3B3S-PRD-PCO-110-SEC-RNSCOMP-B0-EXP-TWIN-DIR-XXXXXX-XXXXXX-XXXXX"
+        ]}
+
+        return urlTable_mobile[version] if self.mobile else urlTable[version]
 
     def checkAB(self):
         placements = self.getPlacementsFromPage()
         for placement in placements:
-            print(placement["url"])
+            print(placement["title"], placement["url"])
         print("")
         if "-B0-" in placements[0]["url"]:
             self.check(placements, "B")
@@ -89,7 +114,7 @@ class LandingPageTest(unittest.TestCase):
             placements = self.getPlacementsFromPage()
             self.check(placements, "B_Annual")
 
-    def atestDesktop(self):        
+    def testDesktop(self):        
         testUrl = "http://www.experian.com"
         self.driver.get(testUrl)
         reportScoreElement = self.driver.find_element(By.CSS_SELECTOR,"ul.left-main-nav.main-nav.flex-nav > li:nth-child(1) > a")
@@ -98,7 +123,7 @@ class LandingPageTest(unittest.TestCase):
         compareAllProductsElement = self.driver.find_element(By.CSS_SELECTOR, ".dropdown-shadow > li:nth-child(6) > a")
         compareAllProductsElement.click()
         self.mobile = False
-        self.checkAB
+        self.checkAB()
 
     def testMobile(self):
         self.driver.set_window_size(375, 812)
