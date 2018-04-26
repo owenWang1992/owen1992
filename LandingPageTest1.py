@@ -7,7 +7,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 import time
+'''
+Grab all op links and print out.
 
+Assert offer and op match each other based on a opTable dictionary.
+Assert no unrecognized offer and op pair
+Assert Campain field is not "XXXX"
+Test passed if all assert pass, otherwise failed.
+
+if new offer and op pairs are found, print out so that they can be copied and added to opTable
+
+'''
 
 class LandingPageTest(unittest.TestCase):
     def setUp(self):
