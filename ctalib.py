@@ -76,6 +76,8 @@ offer_table = {
     'at_3b3s110': '3B3S'
 }
 
+campaigns_table = ["RNSCOMP"]
+recipes_table = ["A0", "B0"]
 
 def parseCTALink(link):
         url = link.get_attribute("href")
@@ -85,7 +87,7 @@ def parseCTALink(link):
             cta_data = dict(parse.parse_qsl(a[1]))
             cta_data["url"] = url
             cta_data["title"] = link.get_attribute("innerText")
-            cta_data["hidden"] = False if link.is_displayed() else True
+            cta_data["hidden"] = False
             if "op" in cta_data:
                 opComponents = cta_data["op"].split("-")
                 cta_data["op_product"] = "-".join(opComponents[0:1])
@@ -93,7 +95,7 @@ def parseCTALink(link):
                 cta_data["op_placement"] = "-".join(opComponents[4:5])
                 cta_data["op_campaign"] = "-".join(opComponents[5:6])
                 cta_data["op_recipe"] = "-".join(opComponents[6:7])
-                cta_data["op_source"] = "-".join(opComponents[7:8])
+                cta_data["op_brand"] = "-".join(opComponents[7:8])
                 cta_data["op_platform"] = "-".join(opComponents[8:9])
         return cta_data
 
@@ -109,14 +111,25 @@ def checkMissingOp(cta):
     if "op" in cta:
         return ""
     else:
-        return "op is missing in " + cta["url"]
+        return "\tMissing op"
 
 
 def checkOpOffer(cta):
-    if ("offer" in cta) and ("op_product" in cta) and ("op_offer_number" in cta) and offer_table[cta["offer"]]:
+    if ("offer" in cta) and ("op_product" in cta) and ("op_offer_number" in cta) and (cta["offer"] in offer_table):
         product = offer_table[cta["offer"]]
         if(product == cta["op_product"] and cta["op_offer_number"] == cta["offer"][-3:]):
             return ""
-        return "op has invalid product or offer number in " + cta["url"]
+        else:
+            return "\tUnmatch offer tage and product: " + cta["offer"] + " " + cta["op_product"] + "-" + cta["op_offer_number"]
 
+def checkCampaign(cta):
+    if ("op_campaign" in cta) and cta["op_campaign"] in campaigns_table:
+        return ""
+    else:
+        return "\tInvalid campaign ID: " + cta["op_campaign"]
 
+def checkRecipe(cta):
+    if ("op_recipe" in cta) and cta["op_recipe"] in recipes_table:
+        return ""
+    else:
+        return "\tInvalid recipe: " + cta["op_recipe"]

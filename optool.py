@@ -7,6 +7,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 import ctalib
 import time
+import sys
 '''
 https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-GMAC-DIR-XXXXXX-XXXXXX-PHAS2
 cta["offer"] = "at_fcras100"
@@ -18,6 +19,7 @@ cta["op_recipe"] = "B0"
 cta
 '''
 
+__unittest = True
 class LandingPageTest(unittest.TestCase):
     def setUp(self):
         options = webdriver.ChromeOptions()
@@ -28,13 +30,12 @@ class LandingPageTest(unittest.TestCase):
         options.add_argument("start-maximized")
         self.driver = webdriver.Chrome(options=options)
         self.driver.implicitly_wait(10)
-        self.mobile = False
-        
-
+     
     def doTest(self):
         # test_url_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         # test_url_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        # test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        test_url = "file:///C:/owen1992/optooltest.html"
         self.driver.get(test_url)
         print(self.driver.current_url)
         self.checkPage()
@@ -55,12 +56,11 @@ class LandingPageTest(unittest.TestCase):
         self.driver.set_window_size(375, 812)
         self.doTest()
 
-    def testPad(self):
-        print("\nTest Pad")
+    def testTablet(self):
+        print("\nTest Tablet")
         time.sleep(5)
         self.driver.set_window_size(900, 1366)
         self.doTest()
-    
 
     def tearDown(self):
         self.driver.close()
@@ -74,14 +74,27 @@ class LandingPageTest(unittest.TestCase):
                 cta["title"], cta["url"], "\tH" if cta["hidden"] else ""))
         print("")
         errors = []
+        hasError = False
         for cta in cta_list:
+            errors.clear()
+            print("")
             self.checkError(ctalib.checkMissingOp(cta), errors)
-            self.checkError(ctalib.checkOpOffer(cta), errors)
-            self.assertListEqual(errors, [])
+            if "op" in cta:
+                self.checkError(ctalib.checkOpOffer(cta), errors)
+                self.checkError(ctalib.checkCampaign(cta), errors)
+                self.checkError(ctalib.checkRecipe(cta), errors)
+            if len(errors):
+                hasError = True
+                print(cta["url"])
+                for error in errors:
+                    print(error)
+        self.assertEqual(hasError, False, "Errors found!")
     
+       
     def checkError(self, error, errors):
         if(error):
             errors.append(error)
-    
+
+
 if __name__ == '__main__':
     unittest.main()
