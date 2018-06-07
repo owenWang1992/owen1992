@@ -87,12 +87,12 @@ def parseCTALink(link):
             cta_data = dict(parse.parse_qsl(a[1]))
             cta_data["url"] = url
             cta_data["title"] = link.get_attribute("innerText")
-            cta_data["hidden"] = False
+            cta_data["hidden"] = not link.is_displayed()
             if "op" in cta_data:
                 opComponents = cta_data["op"].split("-")
-                cta_data["op_product"] = "-".join(opComponents[0:1])
-                cta_data["op_offer_number"] = "-".join(opComponents[3:4])
-                cta_data["op_placement"] = "-".join(opComponents[4:5])
+                cta_data["op_product_family"] = "-".join(opComponents[0:1])
+                cta_data["op_product_identifier"] = "-".join(opComponents[3:4])
+                cta_data["op_placement_identifier"] = "-".join(opComponents[4:5])
                 cta_data["op_campaign"] = "-".join(opComponents[5:6])
                 cta_data["op_recipe"] = "-".join(opComponents[6:7])
                 cta_data["op_brand"] = "-".join(opComponents[7:8])
@@ -115,12 +115,14 @@ def checkMissingOp(cta):
 
 
 def checkOpOffer(cta):
-    if ("offer" in cta) and ("op_product" in cta) and ("op_offer_number" in cta) and (cta["offer"] in offer_table):
-        product = offer_table[cta["offer"]]
-        if(product == cta["op_product"] and cta["op_offer_number"] == cta["offer"][-3:]):
+    if ("op_product_family" in cta) and ("op_product_identifier" in cta) and (cta["offer"] in offer_table):
+        product_family = offer_table[cta["offer"]]
+        if(product_family == cta["op_product_family"] and cta["op_product_identifier"] == cta["offer"][-3:]):
             return ""
         else:
-            return "\tUnmatch offer tage and product: " + cta["offer"] + " " + cta["op_product"] + "-" + cta["op_offer_number"]
+            return "\tUnmatch offer tag and product: " + cta["offer"] + " " + cta["op_product_family"] + "-" + cta["op_product_identifier"]
+    else:
+        return "\tMissing or invalid product family, or product identifier: " + cta["offer"] + " " + cta["op_product_family"] + "-" + cta["op_product_identifier"]
 
 def checkCampaign(cta):
     if ("op_campaign" in cta) and cta["op_campaign"] in campaigns_table:

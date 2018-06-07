@@ -20,6 +20,8 @@ cta
 '''
 
 __unittest = True
+
+
 class LandingPageTest(unittest.TestCase):
     def setUp(self):
         options = webdriver.ChromeOptions()
@@ -30,12 +32,12 @@ class LandingPageTest(unittest.TestCase):
         options.add_argument("start-maximized")
         self.driver = webdriver.Chrome(options=options)
         self.driver.implicitly_wait(10)
-     
+
     def doTest(self):
         # test_url_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         # test_url_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        # test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
-        test_url = "file:///C:/owen1992/optooltest.html"
+        test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        # test_url = "file:///C:/owen1992/optooltest.html"
         self.driver.get(test_url)
         print(self.driver.current_url)
         self.checkPage()
@@ -69,6 +71,7 @@ class LandingPageTest(unittest.TestCase):
     def checkPage(self):
         links = self.driver.find_elements(By.CSS_SELECTOR, "a")
         cta_list = ctalib.getCTAListFromLinks(links)
+        
         for cta in cta_list:
             print("{:20s} {} {}".format(
                 cta["title"], cta["url"], "\tH" if cta["hidden"] else ""))
@@ -77,7 +80,6 @@ class LandingPageTest(unittest.TestCase):
         hasError = False
         for cta in cta_list:
             errors.clear()
-            print("")
             self.checkError(ctalib.checkMissingOp(cta), errors)
             if "op" in cta:
                 self.checkError(ctalib.checkOpOffer(cta), errors)
@@ -85,6 +87,7 @@ class LandingPageTest(unittest.TestCase):
                 self.checkError(ctalib.checkRecipe(cta), errors)
             if len(errors):
                 hasError = True
+                print("")
                 print(cta["url"])
                 for error in errors:
                     print(error)
