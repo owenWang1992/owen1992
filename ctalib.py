@@ -13,15 +13,7 @@ error_table = {
     106: "Unknown campaign code",
     107: "Unknown recipe code"
 }
-# FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-GMAC-DIR-XXXXXX-XXXXXX-PHAS2
 
-
-class OPComponent(Enum):
-    PRODUCT_FAMILY = 0
-    PRODUCT_ID = 3
-    PLACEMENT = 4
-    CAMPAIGN = 5
-    RECIPE = 6
 
 class OPError(Enum):
     MISSING_OP = 100
@@ -116,80 +108,110 @@ offer_table = {
 campaigns_table = ["RNSCOMP"]
 recipes_table = ["A0", "B0"]
 
-def errorComponent(cta, errorCode):
-    if errorCode == OPError.INVALID_OP:
-        return cta["op"]
-    elif errorCode == OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY:
-        return "[" + cta["offer"] + ", " + opComponent(cta, OPComponent.PRODUCT_FAMILY) + "] should be [" + cta["offer"] + ", " + offer_table[cta["offer"]] + "]"
-    elif errorCode == OPError.MISMATH_OFFERTAG_PRODUCTID:
-        return cta["offer"] + ", " + opComponent(cta, OPComponent.PRODUCT_ID)
-    elif errorCode == OPError.CONSECUTIVE_Y:
-        return cta["op"]
-    elif errorCode == OPError.UNKNNOW_OFFERTAG:
-        return cta["offer"]
-    elif errorCode == OPError.UNKNOWN_CAMPAIGN:
-        return opComponent(cta, OPComponent.CAMPAIGN)
-    elif errorCode == OPError.UNKNOWN_RECIPE:
-        return opComponent(cta, OPComponent.RECIPE)
-    else:
-        return ""
 
-def opComponent(cta, opc):
-    return cta["op"].split("-")[opc.value]
+class OP:
+    # FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-GMAC-DIR-XXXXXX-XXXXXX-PHAS2
+    def __init__(self, op):
+        self.value = op
+        self.components = self.value.split("-")
+        self.is_valid = True if len(
+            self.components) == OP_COMPONENTS_NUM else False
+        try:
+            self.product_family = self.components[0]
+            self.product_id = self.components[3]
+            self.placement = self.components[4]
+            self.campaign = self.components[5]
+            self.recipe = self.components[6]
+            self.brand = self.components[7]
+            self.platform = self.components[8]
+            self.source = self.components[8]
+        except:
+            self.is_valid = False
 
-def parseCTALink(link):
-    url = link.get_attribute("href")
-    cta_data = {}
-    if url and "?" in url:
-        a = url.split('?')
-        cta_data = dict(parse.parse_qsl(a[1]))
-        cta_data["url"] = url
-        cta_data["title"] = link.get_attribute("innerText")
-        cta_data["hidden"] = not link.is_displayed()
-    return cta_data
+    def has_components_with_consecutive_chars(self, consecutive_char):
+        for opcomponent in self.components:
+            if opcomponent == consecutive_char * len(opcomponent):
+                return True
+        return False
+
+    def has_matched_product_family(self, offer):
+        return True if self.product_family and offer in offer_table and self.product_family == offer_table[offer] else False
+
+    def has_matched_product_id(self, offer):
+        return True if self.product_id and offer in offer_table and self.product_id == offer[-3:] else False
+
+    def has_valid_campaign(self):
+        return True if self.campaign and self.campaign in campaigns_table else False
+
+    def has_valid_recipe(self):
+        return True if self.recipe and self.recipe in recipes_table else False
+
+
+class CTA:
+    def __init__(self, cta_link):
+        self.url = cta_link.get_attribute("href")
+        self.title = cta_link.get_attribute("innerText")
+        self.hidden = not cta_link.is_displayed()
+        self.query = self.url.split(
+            "?")[1] if self.url and "?" in self.url else ""
+        self.query_data = dict(parse.parse_qsl(self.query))
+        self.op = OP(self.query_data["op"]) if "op" in self.query else None
+        self.offer = self.query_data["offer"] if "offer" in self.query else ""
+
+    def has_known_offer(self):
+        return True if self.offer and self.offer in offer_table else False
+
+    def checkOP(self):
+        errors = set()
+        if not self.op:
+            errors.add(OPError.MISSING_OP)
+            return errors
+        if not self.op.is_valid:
+            errors.add(OPError.INVALID_OP)
+
+        if self.op.has_components_with_consecutive_chars("Y"):
+            errors.add(OPError.CONSECUTIVE_Y)
+
+        if not self.has_known_offer:
+            errors.add(OPError.UNKNNOW_OFFERTAG)
+        else:
+            if not self.has_known_offer():
+                errors.add(OPError.UNKNNOW_OFFERTAG)
+            if not self.op.has_matched_product_family(self.offer):
+                errors.add(OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY)
+            if not self.op.has_matched_product_id(self.offer):
+                errors.add(OPError.MISMATH_OFFERTAG_PRODUCTID)
+
+        if not self.op.has_valid_campaign:
+            errors.add(OPError.UNKNOWN_CAMPAIGN)
+        if not self.op.has_valid_recipe:
+            errors.add(OPError.UNKNOWN_RECIPE)
+        return errors       
+
+    def errorInfo(self, error_code):
+        if error_code == OPError.INVALID_OP:
+            return self.op.value
+        elif error_code == OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY:
+            return "[" + self.offer + ", " + self.op.product_family + "] should be [" + self.offer + ", " + offer_table[self.offer] + "]"
+        elif error_code == OPError.MISMATH_OFFERTAG_PRODUCTID:
+            return self.offer + ", " + self.op.product_id
+        elif error_code == OPError.CONSECUTIVE_Y:
+            return self.op.value
+        elif error_code == OPError.UNKNNOW_OFFERTAG:
+            return self.offer
+        elif error_code == OPError.UNKNOWN_CAMPAIGN:
+            return self.op.campaign
+        elif error_code == OPError.UNKNOWN_RECIPE:
+            return self.op.recipe
+        else:
+            return ""
 
 
 def getCTAListFromLinks(links):
-    cta_list = []
+    cta_list =[]
     for link in links:
-        cta_data = parseCTALink(link)
-        if "offer" in cta_data:
-            cta_list.append(cta_data)
+        cta = CTA(link)
+        if cta.offer:
+            cta_list.append(cta)
     return cta_list
 
-
-def checkOp(cta):
-    errors = set()
-    if not "op" in cta:
-        errors.add(OPError.MISSING_OP)
-        return errors
-
-    opcomponents = cta["op"].split("-")
-    # check op length, must be 13
-    if len(opcomponents) != OP_COMPONENTS_NUM:
-        errors.add(OPError.INVALID_OP)
-
-    # check YYYY
-    for opcomponent in opcomponents:
-        if opcomponent == "Y" * len(opcomponent):
-            errors.add(OPError.CONSECUTIVE_Y)
-
-    # check offer and product
-    if not cta["offer"] in offer_table:
-        errors.add(OPError.UNKNNOW_OFFERTAG)
-    else:
-        product_family = offer_table[cta["offer"]]
-        if product_family != opComponent(cta, OPComponent.PRODUCT_FAMILY):
-            errors.add(OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY)
-        if opComponent(cta, OPComponent.PRODUCT_ID) != cta["offer"][-3:]:
-            errors.add(OPError.MISMATH_OFFERTAG_PRODUCTID)
-
-    # check campaign
-    if not opComponent(cta, OPComponent.CAMPAIGN) in campaigns_table:
-        errors.add(OPError.UNKNOWN_CAMPAIGN)
-
-    # check recipe
-    if not opComponent(cta, OPComponent.RECIPE) in recipes_table:
-        errors.add(OPError.UNKNOWN_RECIPE)
-
-    return errors

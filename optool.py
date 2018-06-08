@@ -37,8 +37,8 @@ class LandingPageTest(unittest.TestCase):
     def doTest(self):
         # test_url_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         # test_url_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
-        #test_url = "file://" + os.path.join((os.path.split(__file__))[0], "optooltest.html")
+        #test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        test_url = "file://" + os.path.join((os.path.split(__file__))[0], "optooltest.html")
         self.driver.get(test_url)
         print(self.driver.current_url)
         self.checkPage()
@@ -71,25 +71,26 @@ class LandingPageTest(unittest.TestCase):
 
     def checkPage(self):
         links = self.driver.find_elements(By.CSS_SELECTOR, "a")
+        
         cta_list = ctalib.getCTAListFromLinks(links)
         
         for cta in cta_list:
             print("{:20s} {} {}".format(
-                cta["title"], cta["url"], "\tH" if cta["hidden"] else ""))
+                cta.title, cta.url, "\tH" if cta.hidden else ""))
         print("")
         hasError = False
         errNum = 0
         errCTANum = 0
         for cta in cta_list:
-            errors = ctalib.checkOp(cta)
+            errors = cta.checkOP()
             if len(errors):
                 hasError = True
                 errNum = errNum + len(errors)
                 errCTANum = errCTANum + 1
                 print("")
-                print(cta["url"])
+                print(cta.url)
                 for errorCode in errors:
-                    errorComponetMsg = ctalib.errorComponent(cta, errorCode)
+                    errorComponetMsg = cta.errorInfo(errorCode)
                     if errorComponetMsg:
                         errorComponetMsg = ": " + errorComponetMsg
                     print("\t" + errorCode.msg() + errorComponetMsg)
