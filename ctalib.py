@@ -172,7 +172,7 @@ class CTA:
         if self.op.has_components_with_consecutive_chars("Y"):
             errors.add(OPError.CONSECUTIVE_Y)
 
-        if not self.has_known_offer:
+        if not self.has_known_offer():
             errors.add(OPError.UNKNNOW_OFFERTAG)
         else:
             if not self.has_known_offer():
@@ -182,9 +182,9 @@ class CTA:
             if not self.op.has_matched_product_id(self.offer):
                 errors.add(OPError.MISMATH_OFFERTAG_PRODUCTID)
 
-        if not self.op.has_valid_campaign:
+        if not self.op.has_valid_campaign():
             errors.add(OPError.UNKNOWN_CAMPAIGN)
-        if not self.op.has_valid_recipe:
+        if not self.op.has_valid_recipe():
             errors.add(OPError.UNKNOWN_RECIPE)
         return errors       
 
