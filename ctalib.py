@@ -1,4 +1,41 @@
 from urllib import parse
+from enum import Enum
+
+OP_COMPONENTS_NUM = 13
+
+error_table = {
+    100: "Missing OP",
+    101: "Invalid OP",
+    102: "Mismatching offer tag and product family",
+    103: "Unknown offer tag",
+    104: "Mismatching offer tag and product identifier",
+    105: "Consecutive Y exist in op components",
+    106: "Unknown campaign code",
+    107: "Unknown recipe code"
+}
+# FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-GMAC-DIR-XXXXXX-XXXXXX-PHAS2
+
+
+class OPComponent(Enum):
+    PRODUCT_FAMILY = 0
+    PRODUCT_ID = 3
+    PLACEMENT = 4
+    CAMPAIGN = 5
+    RECIPE = 6
+
+class OPError(Enum):
+    MISSING_OP = 100
+    INVALID_OP = 101
+    MISMATCH_OFFERTAG_PRODUCTFAMILY = 102
+    UNKNNOW_OFFERTAG = 103
+    MISMATH_OFFERTAG_PRODUCTID = 104
+    CONSECUTIVE_Y = 105
+    UNKNOWN_CAMPAIGN = 106
+    UNKNOWN_RECIPE = 107
+
+    def msg(self):
+        return error_table[self.value]
+
 
 offer_table = {
     'at_frsas102': 'FRSC',
@@ -79,25 +116,38 @@ offer_table = {
 campaigns_table = ["RNSCOMP"]
 recipes_table = ["A0", "B0"]
 
+def errorComponent(cta, errorCode):
+    if errorCode == OPError.INVALID_OP:
+        return cta["op"]
+    elif errorCode == OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY:
+        return "[" + cta["offer"] + ", " + opComponent(cta, OPComponent.PRODUCT_FAMILY) + "] should be [" + cta["offer"] + ", " + offer_table[cta["offer"]] + "]"
+    elif errorCode == OPError.MISMATH_OFFERTAG_PRODUCTID:
+        return cta["offer"] + ", " + opComponent(cta, OPComponent.PRODUCT_ID)
+    elif errorCode == OPError.CONSECUTIVE_Y:
+        return cta["op"]
+    elif errorCode == OPError.UNKNNOW_OFFERTAG:
+        return cta["offer"]
+    elif errorCode == OPError.UNKNOWN_CAMPAIGN:
+        return opComponent(cta, OPComponent.CAMPAIGN)
+    elif errorCode == OPError.UNKNOWN_RECIPE:
+        return opComponent(cta, OPComponent.RECIPE)
+    else:
+        return ""
+
+def opComponent(cta, opc):
+    return cta["op"].split("-")[opc.value]
+
 def parseCTALink(link):
-        url = link.get_attribute("href")
-        cta_data = {}
-        if url and "?" in url:
-            a = url.split('?')
-            cta_data = dict(parse.parse_qsl(a[1]))
-            cta_data["url"] = url
-            cta_data["title"] = link.get_attribute("innerText")
-            cta_data["hidden"] = not link.is_displayed()
-            if "op" in cta_data:
-                opComponents = cta_data["op"].split("-")
-                cta_data["op_product_family"] = "-".join(opComponents[0:1])
-                cta_data["op_product_identifier"] = "-".join(opComponents[3:4])
-                cta_data["op_placement_identifier"] = "-".join(opComponents[4:5])
-                cta_data["op_campaign"] = "-".join(opComponents[5:6])
-                cta_data["op_recipe"] = "-".join(opComponents[6:7])
-                cta_data["op_brand"] = "-".join(opComponents[7:8])
-                cta_data["op_platform"] = "-".join(opComponents[8:9])
-        return cta_data
+    url = link.get_attribute("href")
+    cta_data = {}
+    if url and "?" in url:
+        a = url.split('?')
+        cta_data = dict(parse.parse_qsl(a[1]))
+        cta_data["url"] = url
+        cta_data["title"] = link.get_attribute("innerText")
+        cta_data["hidden"] = not link.is_displayed()
+    return cta_data
+
 
 def getCTAListFromLinks(links):
     cta_list = []
@@ -107,31 +157,39 @@ def getCTAListFromLinks(links):
             cta_list.append(cta_data)
     return cta_list
 
-def checkMissingOp(cta):
-    if "op" in cta:
-        return ""
+
+def checkOp(cta):
+    errors = set()
+    if not "op" in cta:
+        errors.add(OPError.MISSING_OP)
+        return errors
+
+    opcomponents = cta["op"].split("-")
+    # check op length, must be 13
+    if len(opcomponents) != OP_COMPONENTS_NUM:
+        errors.add(OPError.INVALID_OP)
+
+    # check YYYY
+    for opcomponent in opcomponents:
+        if opcomponent == "Y" * len(opcomponent):
+            errors.add(OPError.CONSECUTIVE_Y)
+
+    # check offer and product
+    if not cta["offer"] in offer_table:
+        errors.add(OPError.UNKNNOW_OFFERTAG)
     else:
-        return "\tMissing op"
-
-
-def checkOpOffer(cta):
-    if ("op_product_family" in cta) and ("op_product_identifier" in cta) and (cta["offer"] in offer_table):
         product_family = offer_table[cta["offer"]]
-        if(product_family == cta["op_product_family"] and cta["op_product_identifier"] == cta["offer"][-3:]):
-            return ""
-        else:
-            return "\tUnmatch offer tag and product: " + cta["offer"] + " " + cta["op_product_family"] + "-" + cta["op_product_identifier"]
-    else:
-        return "\tMissing or invalid product family, or product identifier: " + cta["offer"] + " " + cta["op_product_family"] + "-" + cta["op_product_identifier"]
+        if product_family != opComponent(cta, OPComponent.PRODUCT_FAMILY):
+            errors.add(OPError.MISMATCH_OFFERTAG_PRODUCTFAMILY)
+        if opComponent(cta, OPComponent.PRODUCT_ID) != cta["offer"][-3:]:
+            errors.add(OPError.MISMATH_OFFERTAG_PRODUCTID)
 
-def checkCampaign(cta):
-    if ("op_campaign" in cta) and cta["op_campaign"] in campaigns_table:
-        return ""
-    else:
-        return "\tInvalid campaign ID: " + cta["op_campaign"]
+    # check campaign
+    if not opComponent(cta, OPComponent.CAMPAIGN) in campaigns_table:
+        errors.add(OPError.UNKNOWN_CAMPAIGN)
 
-def checkRecipe(cta):
-    if ("op_recipe" in cta) and cta["op_recipe"] in recipes_table:
-        return ""
-    else:
-        return "\tInvalid recipe: " + cta["op_recipe"]
+    # check recipe
+    if not opComponent(cta, OPComponent.RECIPE) in recipes_table:
+        errors.add(OPError.UNKNOWN_RECIPE)
+
+    return errors

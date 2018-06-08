@@ -8,6 +8,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 import ctalib
 import time
 import sys
+import os
 '''
 https://usa.experian.com/#/registration?offer=at_fcras100&br=exp&op=FRCR-PRD-PCO-100-MQE-RNSCOMP-B0-EXP-GMAC-DIR-XXXXXX-XXXXXX-PHAS2
 cta["offer"] = "at_fcras100"
@@ -37,7 +38,7 @@ class LandingPageTest(unittest.TestCase):
         # test_url_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         # test_url_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
         test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
-        # test_url = "file:///C:/owen1992/optooltest.html"
+        #test_url = "file://" + os.path.join((os.path.split(__file__))[0], "optooltest.html")
         self.driver.get(test_url)
         print(self.driver.current_url)
         self.checkPage()
@@ -76,28 +77,23 @@ class LandingPageTest(unittest.TestCase):
             print("{:20s} {} {}".format(
                 cta["title"], cta["url"], "\tH" if cta["hidden"] else ""))
         print("")
-        errors = []
         hasError = False
+        errNum = 0
+        errCTANum = 0
         for cta in cta_list:
-            errors.clear()
-            self.checkError(ctalib.checkMissingOp(cta), errors)
-            if "op" in cta:
-                self.checkError(ctalib.checkOpOffer(cta), errors)
-                self.checkError(ctalib.checkCampaign(cta), errors)
-                self.checkError(ctalib.checkRecipe(cta), errors)
+            errors = ctalib.checkOp(cta)
             if len(errors):
                 hasError = True
+                errNum = errNum + len(errors)
+                errCTANum = errCTANum + 1
                 print("")
                 print(cta["url"])
-                for error in errors:
-                    print(error)
-        self.assertEqual(hasError, False, "Errors found!")
+                for errorCode in errors:
+                    errorComponetMsg = ctalib.errorComponent(cta, errorCode)
+                    if errorComponetMsg:
+                        errorComponetMsg = ": " + errorComponetMsg
+                    print("\t" + errorCode.msg() + errorComponetMsg)
+        self.assertEqual(hasError, False, "Found {} Errors in {} CTA!".format(errNum, errCTANum))
     
-       
-    def checkError(self, error, errors):
-        if(error):
-            errors.append(error)
-
-
 if __name__ == '__main__':
     unittest.main()
