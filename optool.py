@@ -37,8 +37,8 @@ class LandingPageTest(unittest.TestCase):
     def doTest(self):
         # test_url_A = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-1.html?pc=dir_exp_0"
         # test_url_B = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products-cl.html?pc=dir_exp_0"
-        #test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
-        test_url = "file://" + os.path.join((os.path.split(__file__))[0], "optooltest.html")
+        test_url = "https://www.experian.com/consumer-products/compare-credit-report-and-score-products.html"
+        #test_url = "file://" + os.path.join((os.path.split(__file__))[0], "optooltest.html")
         self.driver.get(test_url)
         print(self.driver.current_url)
         self.checkPage()
