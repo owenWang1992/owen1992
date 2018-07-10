@@ -79,14 +79,14 @@ class LandingPageTest(unittest.TestCase):
                 cta.title, cta.url, "\tH" if cta.hidden else ""))
         print("")
         hasError = False
-        errNum = 0
-        errCTANum = 0
+        totalErrorNum = 0
+        totalInvaildCTA = 0
         for cta in cta_list:
             errors = cta.checkOP()
             if len(errors):
                 hasError = True
-                errNum = errNum + len(errors)
-                errCTANum = errCTANum + 1
+                totalErrorNum = totalErrorNum + len(errors)
+                totalInvaildCTA = totalInvaildCTA + 1
                 print("")
                 print(cta.url)
                 for errorCode in errors:
@@ -94,7 +94,7 @@ class LandingPageTest(unittest.TestCase):
                     if errorComponetMsg:
                         errorComponetMsg = ": " + errorComponetMsg
                     print("\t" + errorCode.msg() + errorComponetMsg)
-        self.assertEqual(hasError, False, "Found {} Errors in {} CTA!".format(errNum, errCTANum))
+        self.assertEqual(hasError, False, "Found {} Errors in {} CTA!".format(totalErrorNum, totalInvaildCTA))
     
 if __name__ == '__main__':
     unittest.main()
