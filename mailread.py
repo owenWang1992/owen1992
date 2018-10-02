@@ -14,13 +14,11 @@ import email
 import base64
 import os
 
-ORG_EMAIL   = "@gmail.com"
-FROM_EMAIL  = "sihaowang4test" + ORG_EMAIL
-FROM_PWD    = b'c2loYW93YW5nNDE5'
-FROM_EMAIL1  = "wshwjh" + ORG_EMAIL
-FROM_PWD1    = b'd2poMTk5MjA5'
-SMTP_SERVER = "imap.gmail.com"
-SMTP_PORT   = 993
+FROM_EMAIL  = "sihaowang4test@gmail.com"
+FROM_EMAIL1  = "wshwjh@gmail.com"
+IMAP_SERVER = "imap.gmail.com"
+IMAP_SERVER2 = "outlook.office365.com"
+IMAP_PORT   = 993
 
 # -------------------------------------------------
 #
@@ -58,15 +56,20 @@ def openHtmlFile(filename):
     driver.quit()
 
 
+def create_mail(imap_server, username, password):
+    mail = imaplib.IMAP4_SSL(imap_server)
+    mail.login(username, password)
+    return mail
 
 def read_email_from_gmail():
     try:
-        mail = imaplib.IMAP4_SSL(SMTP_SERVER)
-        pwd = base64.b64decode(FROM_PWD1).decode('utf-8')
-        mail.login(FROM_EMAIL1,pwd)
+        username = FROM_EMAIL1
+        pwd= input("Password for " + username + ": ")
+        mail = create_mail(IMAP_SERVER, username, pwd)
         mail.select('inbox')
 
         type, data = mail.search(None, 'FROM', '"Experian"')
+        #type, data = mail.search(None, 'ALL')
         mail_ids = data[0]
 
         id_list = list(map(lambda x: str(int(x)), mail_ids.split()))
