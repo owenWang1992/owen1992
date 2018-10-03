@@ -7,9 +7,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 import sys
 import os
+import getpass
 
 
 def openGmail():
+    gmailaccount = "sihaowang4test@gmail.com"
+    print(gmailaccount)
+    password =getpass.getpass()
+    gmailparts = gmailaccount.split("@")
+    username = gmailparts[0] + "@gmail.com"
     options = webdriver.ChromeOptions()
     #options.add_argument("--incognito")
     #options.add_argument('--ignore-certificate-errors')
@@ -19,11 +25,11 @@ def openGmail():
     driver.implicitly_wait(10)
     driver.get("https://accounts.google.com/signin")
     emailElement = driver.find_element_by_xpath("//input[@id='identifierId']")
-    emailElement.send_keys("sihaowang4test@gmail.com")
+    emailElement.send_keys(username)
     driver.find_element_by_id("identifierNext").click()
     wait = WebDriverWait(driver, 20)
     passwordElement = wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@name='password']")))
-    passwordElement.send_keys("sihaowang419")
+    passwordElement.send_keys(password)
     driver.find_element_by_id("passwordNext").click()
     time.sleep(5)
     driver.get("https://mail.google.com/mail/u/0/#inbox")
