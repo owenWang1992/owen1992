@@ -41,6 +41,7 @@ def saveHtmlFile(str, filename):
 
 def openMessage(messageid):
     htmlFileName = "file://" + os.path.join((os.path.split(os.path.realpath(__file__)))[0], messageid + ".html")
+    print(htmlFileName)
     openHtmlFile(htmlFileName)
 
 
