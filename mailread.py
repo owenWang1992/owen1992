@@ -7,12 +7,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
+
 import smtplib
 import time
 import imaplib
 import email
 import base64
 import os
+import getpass
 
 FROM_EMAIL  = "sihaowang4test@gmail.com"
 FROM_EMAIL1  = "wshwjh@gmail.com"
@@ -38,7 +40,7 @@ def saveHtmlFile(str, filename):
     Html_file.close()
 
 def openMessage(messageid):
-    htmlFileName = "file://" + os.path.join((os.path.split(__file__))[0], messageid + ".html")
+    htmlFileName = "file://" + os.path.join((os.path.split(os.path.realpath(__file__)))[0], messageid + ".html")
     openHtmlFile(htmlFileName)
 
 
@@ -64,7 +66,8 @@ def create_mail(imap_server, username, password):
 def read_email_from_gmail():
     try:
         username = FROM_EMAIL1
-        pwd= input("Password for " + username + ": ")
+        print(username)
+        pwd= getpass.getpass()
         mail = create_mail(IMAP_SERVER, username, pwd)
         mail.select('inbox')
 
